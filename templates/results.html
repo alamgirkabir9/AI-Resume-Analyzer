@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results - AI Resume Analyzer</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            text-align: center;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card.success {
+            background: linear-gradient(135deg, var(--success-color), #059669);
+        }
+
+        .stat-card.warning {
+            background: linear-gradient(135deg, var(--warning-color), #d97706);
+        }
+
+        .stat-card.info {
+            background: linear-gradient(135deg, #0ea5e9, #0284c7);
+        }
+
+        .table-responsive {
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table th {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px;
+        }
+
+        .table td {
+            padding: 15px;
+            vertical-align: middle;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 10px;
+            padding: 12px 30px;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), #059669);
+            border: none;
+            border-radius: 10px;
+        }
+
+        .score-badge {
+            font-size: 1.1em;
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+
+        .candidate-card {
+            border-left: 5px solid var(--primary-color);
+            margin-bottom: 15px;
+        }
+
+        .candidate-card.perfect {
+            border-left-color: var(--success-color);
+        }
+
+        .candidate-card.okay {
+            border-left-color: var(--warning-color);
+        }
+
+        .candidate-card.needs-work {
+            border-left-color: var(--danger-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-robot me-2"></i>AI Resume Analyzer
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/">
+                    <i class="fas fa-home me-1"></i>Home
+                </a>
+                <a class="nav-link" href="/download_results">
+                    <i class="fas fa-download me-1"></i>Download CSV
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="display-5 fw-bold text-primary">
+                    <i class="fas fa-chart-bar me-3"></i>Analysis Results
+                </h1>
+                <p class="lead text-muted">Comprehensive resume analysis results</p>
+            </div>
+        </div>
+
+        <!-- Statistics Cards -->
+        <div class="row mb-5">
+            <div class="col-md-3">
+                <div class="stat-card">
+                    <h2 class="mb-2">{{ total_resumes }}</h2>
+                    <p class="mb-0"><i class="fas fa-file-pdf me-2"></i>Total Resumes</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card success">
+                    <h2 class="mb-2">{{ perfect_candidates }}</h2>
+                    <p class="mb-0"><i class="fas fa-star me-2"></i>Perfect Matches</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card warning">
+                    <h2 class="mb-2">{{ okay_candidates }}</h2>
+                    <p class="mb-0"><i class="fas fa-thumbs-up me-2"></i>Good Matches</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stat-card info">
+                    <h2 class="mb-2">{{ avg_score }}%</h2>
+                    <p class="mb-0"><i class="fas fa-chart-line me-2"></i>Average Score</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <a href="/download_results" class="btn btn-success btn-lg w-100">
+                    <i class="fas fa-download me-2"></i>Download Full Report (CSV)
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a href="/" class="btn btn-primary btn-lg w-100">
+                    <i class="fas fa-plus me-2"></i>Analyze More Resumes
+                </a>
+            </div>
+        </div>
+
+        <!-- Detailed Results -->
+        <div class="card mb-5">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-users me-2"></i>Candidate Details</h4>
+            </div>
+            <div class="card-body p-0">
+                {% if results %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th><i class="fas fa-user me-2"></i>Name</th>
+                                    <th><i class="fas fa-envelope me-2"></i>Email</th>
+                                    <th><i class="fas fa-percentage me-2"></i>Score</th>
+                                    <th><i class="fas fa-flag me-2"></i>Status</th>
+                                    <th><i class="fas fa-plus-circle me-2"></i>Strengths</th>
+                                    <th><i class="fas fa-minus-circle me-2"></i>Areas to Improve</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for result in results %}
+                                <tr>
+                                    <td class="fw-bold">{{ result.Name or 'Unknown' }}</td>
+                                    <td>
+                                        <a href="mailto:{{ result.email }}" class="text-decoration-none">
+                                            {{ result.email or 'N/A' }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        {% set score = result['Matching Score in percentage']|string %}
+                                        {% set score_num = score.replace('%', '')|int if score else 0 %}
+                                        <span class="badge score-badge 
+                                            {% if score_num >= 80 %}bg-success
+                                            {% elif score_num >= 60 %}bg-warning
+                                            {% else %}bg-danger{% endif %}">
+                                            {{ score or '0%' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if result.is_perfect %}
+                                            <span class="badge bg-success"><i class="fas fa-star me-1"></i>Perfect</span>
+                                        {% elif result.is_okay %}
+                                            <span class="badge bg-warning"><i class="fas fa-thumbs-up me-1"></i>Good</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary"><i class="fas fa-tools me-1"></i>Needs Work</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="text-success">
+                                            {{ result['strong zone'] or 'Not specified' }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="text-danger">
+                                            {{ result['Lack of Knowledge'] or 'Not specified' }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No results found</h5>
+                        <p class="text-muted">Please run an analysis first.</p>
+                        <a href="/" class="btn btn-primary">
+                            <i class="fas fa-arrow-left me-2"></i>Go Back to Analyzer
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Candidate Cards View (Alternative view) -->
+        {% if results %}
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h4 class="mb-0"><i class="fas fa-id-card me-2"></i>Candidate Summary Cards</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for result in results %}
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        {% set score = result['Matching Score in percentage']|string %}
+                        {% set score_num = score.replace('%', '')|int if score else 0 %}
+                        <div class="card candidate-card 
+                            {% if result.is_perfect %}perfect
+                            {% elif result.is_okay %}okay
+                            {% else %}needs-work{% endif %}">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="card-title mb-0 fw-bold">{{ result.Name or 'Unknown' }}</h6>
+                                    <span class="badge 
+                                        {% if score_num >= 80 %}bg-success
+                                        {% elif score_num >= 60 %}bg-warning  
+                                        {% else %}bg-danger{% endif %}">
+                                        {{ score or '0%' }}
+                                    </span>
+                                </div>
+                                <p class="card-text small text-muted mb-2">
+                                    <i class="fas fa-envelope me-1"></i>{{ result.email or 'N/A' }}
+                                </p>
+                                <div class="mb-2">
+                                    <small class="text-success">
+                                        <i class="fas fa-plus-circle me-1"></i>
+                                        <strong>Strengths:</strong> {{ result['strong zone'] or 'Not specified' }}
+                                    </small>
+                                </div>
+                                <div>
+                                    <small class="text-danger">
+                                        <i class="fas fa-minus-circle me-1"></i>
+                                        <strong>Gaps:</strong> {{ result['Lack of Knowledge'] or 'Not specified' }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-4 mt-5">
+        <div class="container">
+            <p class="mb-0">&copy; 2024 AI Resume Analyzer. Built with ❤️ and AI</p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

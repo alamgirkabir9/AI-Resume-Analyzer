@@ -1,0 +1,8 @@
+Flask
+pandas
+PyMuPDF
+yagmail
+python-dotenv
+langchain-core
+langchain-groq
+Werkzeug

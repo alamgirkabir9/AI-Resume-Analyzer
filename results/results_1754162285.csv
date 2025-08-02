@@ -1,0 +1,4 @@
+Name,email,is_perfect,is_okay,Matching Score in percentage,strong zone,Lack of Knowledge
+Md Abdullah Al Hasib,alhasib.iu.cse@gmail.com,False,True,85,"['Machine Learning', 'Deep Learning', 'Computer Vision']",['None']
+Md Abdullah Al Hasib,alhasib.iu.cse@gmail.com,False,True,80,"['computer vision', 'machine learning', 'deep learning']",['NLP (only learning)']
+Md Abdullah Al Hasib,alhasib.iu.cse@gmail.com,False,True,85,"['Machine Learning', 'Computer Vision', 'Deep Learning']",['Specific computer vision algorithms and models for the job description']
