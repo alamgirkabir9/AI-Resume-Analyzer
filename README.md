@@ -1,2 +1,3 @@
  ## 🌐 Live Demo  
-**Deployed on huggingface**: [(https://huggingface.co/spaces/Alamgirapi/NoCodeTextClassifier)]
+**Deployed on Render**: [(https://ai-resume-analyzer-l7ei.onrender.com)]
+
