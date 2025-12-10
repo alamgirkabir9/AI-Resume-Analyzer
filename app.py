@@ -233,7 +233,7 @@ def upload_files():
         # Get form data
         job_description = request.form.get('job_description', '').strip()
         api_key = request.form.get('api_key', '').strip()
-        model_option = request.form.get('model_option', 'llama-3.1-70b-versatile')
+        model_option = request.form.get('model_option', 'llama-3.3-70b-versatile')
         temperature = float(request.form.get('temperature', 0.0))
         
         if not job_description:
